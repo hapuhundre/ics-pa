@@ -38,6 +38,12 @@ static int cmd_q(char *args) {
   return -1;
 }
 
+static int cmd_si(char *args);
+
+static int cmd_info(char *args);
+
+static int cmd_x(char *args);
+
 static int cmd_help(char *args);
 
 static struct {
@@ -48,7 +54,10 @@ static struct {
   { "help", "Display informations about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-
+  // TODO
+  { "si", "Execute instructions", cmd_si },
+  { "info", "Display information about the registers", cmd_info},
+  { "x", "Display memory statistics", cmd_x}
   /* TODO: Add more commands */
 
 };
@@ -75,6 +84,37 @@ static int cmd_help(char *args) {
     }
     printf("Unknown command '%s'\n", arg);
   }
+  return 0;
+}
+
+static int cmd_si(char *args){
+  char *arg = strtok(NULL, " ");
+  int n = 1;
+  if(arg != NULL) {
+    n = strtol(arg, NULL, 10);
+  }
+  cpu_exec(n);
+  return 0;
+}
+
+static int cmd_info(char *args) {
+  char *arg = strtok(NULL, " ");
+  if(arg == NULL) {
+    return 0;
+  }
+  if(arg[0] == 'r') {
+    isa_reg_display();
+  }
+  else if(arg[0] == 'w') {
+    printf("todo...\n");
+  }
+  else {
+    // TODO
+  }
+  return 0;
+}
+
+static int cmd_x(char *args) {
   return 0;
 }
 

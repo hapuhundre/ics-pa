@@ -1,5 +1,6 @@
 #include <isa.h>
 #include <cpu/cpu.h>
+#include <memory/vaddr.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
@@ -115,6 +116,28 @@ static int cmd_info(char *args) {
 }
 
 static int cmd_x(char *args) {
+  char *count_str = strtok(args, " ");
+  if(count_str == NULL) {
+    return 0;
+  }
+  int count = atoi(count_str);
+  if(count <= 0) {
+    return 0;
+  }
+
+  char *expr = count_str + strlen(count_str) + 1;
+  uint32_t addr = strtoul(expr, NULL, 16);
+  int line_count = count%4 == 0 ? count/4 : count/4+1;
+  for(int i=0; i<line_count; ++i) {
+    printf("0x%08x: ", addr+i*4);
+    for(int j=0; j<4;++j) {
+      if(i*4+j >= count) {
+        break;
+      }
+      printf("%d\t", vaddr_read(addr+i*4+j, 4));
+    }
+    printf("\n");
+  }
   return 0;
 }
 

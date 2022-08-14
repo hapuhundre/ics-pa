@@ -1,12 +1,25 @@
-#include <isa.h>
+// #include <isa.h>
 
 /* We use the POSIX regex functions to process regular expressions.
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
+
+void TODO(){
+  // ...
+}
+
+typedef uint32_t word_t;
+#define Log printf
+#define panic printf
+#define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))
 
 enum {
-  TK_NOTYPE = 256, TK_EQ,
+  TK_NOTYPE = 256, TK_EQ,TK_NUM,
 
   /* TODO: Add more token types */
 
@@ -23,7 +36,14 @@ static struct rule {
 
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus
+  {"\\-", '-'},         // minus
+  {"\\*", '*'}, // multiple
+  {"\\/", '/'}, // divide
+  {"\\(", '('},
+  {"\\)", ')'},        // colon
   {"==", TK_EQ},        // equal
+  {"([0-9])*", TK_NUM},
+
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -80,10 +100,31 @@ static bool make_token(char *e) {
          */
 
         switch (rules[i].token_type) {
+          case TK_NOTYPE: {
+            // do nothing 
+            break;
+          }
+          case TK_EQ: {
+            TODO();
+            break;
+          }
+          case '+':
+          case '-':
+          case '*':
+          case '/':
+          case '(':
+          case ')': 
+          case TK_NUM:
+          {
+            tokens[nr_token].type = rules[i].token_type;
+            strncpy(tokens[nr_token].str, substr_start, substr_len);
+            nr_token++;
+            break;
+          }
           default: TODO();
         }
 
-        break;
+        // break;
       }
     }
 
@@ -96,6 +137,13 @@ static bool make_token(char *e) {
   return true;
 }
 
+
+// get ')' postion of '(' in tokens
+// if (12345+12344 - 1234) + 1234 / 245
+int get_pair_postion(int curr){
+  TODO();
+  return 0;
+}
 
 word_t expr(char *e, bool *success) {
   if (!make_token(e)) {

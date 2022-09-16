@@ -1,22 +1,9 @@
-// #include <isa.h>
+#include <isa.h>
 
 /* We use the POSIX regex functions to process regular expressions.
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
-
-void TODO(){
-  // ...
-}
-
-typedef uint32_t word_t;
-#define Log printf
-#define panic printf
-#define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))
 
 enum {
   TK_NOTYPE = 256, TK_EQ,TK_NUM,
@@ -137,12 +124,78 @@ static bool make_token(char *e) {
   return true;
 }
 
+#define is_op(x) (x=='+' || x=='-' || x=='*' || x=='/') ? true : false
+#define lower_eq_op(x) (x=='+' || x=='-') ? true : false // lower or equal
 
-// get ')' postion of '(' in tokens
-// if (12345+12344 - 1234) + 1234 / 245
-int get_pair_postion(int curr){
-  TODO();
+int find_parentheses(int p){
+  int pair_count = 0;
+  for(int i=p; i<nr_token; ++i){
+    if(tokens[i].type == '('){
+      pair_count++;
+    }
+    if(tokens[i].type == ')') {
+      pair_count--;
+    }
+    if(pair_count == 0) {
+      return i;
+    }
+  }
   return 0;
+}
+
+int find_main_operator(int p, int q){
+  assert(p < q);
+  int main_op = -1;
+  for(int i=p; i<=q;++i) {
+    if(tokens[i].type == '(') {
+      i += find_parentheses(i);
+      continue;
+    }
+    if(!is_op(tokens[i].type)) {
+      continue;
+    }
+    if(main_op < 0 || lower_eq_op(tokens[i].type)) {
+      main_op = i;
+    }
+  }
+  return main_op;
+}
+
+bool check_parentheses(int p, int q) {
+  if(tokens[p].type != '(' || tokens[q].type != ')') 
+    return false;
+  return find_parentheses(p) == q;
+}
+
+word_t eval(int p, int q, bool *success) {
+  if(!success) return 0;
+
+  if (p > q) {
+    *success = false;
+    return 0;
+  }
+  else if (p == q) {
+    *success = true;
+    return atoi(tokens[p].str);
+  }
+  else if (check_parentheses(p, q) == true) {
+    return eval(p + 1, q - 1, success);
+  }
+  else {
+    int main_op = find_main_operator(p, q);
+    Log("p: %d, q: %d, main op: %d\n",p,q, main_op);
+    // if(main_op<0)
+    word_t val1 = eval(p, main_op - 1, success);
+    word_t val2 = eval(main_op + 1, q, success);
+
+    switch (tokens[main_op].type) {
+      case '+': return val1 + val2;
+      case '-': return val1 - val2;
+      case '*': return val1 * val2;
+      case '/': return val1 / val2;
+      default: assert(0);
+    }
+  }
 }
 
 word_t expr(char *e, bool *success) {
@@ -150,9 +203,5 @@ word_t expr(char *e, bool *success) {
     *success = false;
     return 0;
   }
-
-  /* TODO: Insert codes to evaluate the expression. */
-  TODO();
-
-  return 0;
+  return eval(0, nr_token-1, success);
 }

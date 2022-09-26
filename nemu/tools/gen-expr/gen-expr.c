@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
 
     int result;
     int fsize = fscanf(fp, "%d", &result);
-    printf("raw result: %d\n", result);
+//  printf("raw result: %d\n", result);
     pclose(fp);
     if(fsize >= 0) {
       printf("%u %s\n", result, buf);

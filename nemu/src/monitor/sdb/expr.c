@@ -29,7 +29,10 @@ static struct rule {
   {"\\(", '('},
   {"\\)", ')'},        // colon
   {"==", TK_EQ},        // equal
-  {"([0-9])*", TK_NUM},
+  {"([0-9])*", TK_NUM}, // decimal with dot: ^[0-9]+(.[0-9])*
+  // hexadecimal: (0x|0X)?([0-9])*
+  // reg: (\$)?([0-9a-zA-Z])*
+  
 
 };
 
